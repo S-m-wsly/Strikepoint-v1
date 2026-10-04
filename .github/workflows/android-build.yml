@@ -7,6 +7,7 @@ on:
 
 env:
   GODOT_VERSION: "4.3"
+  PROJECT_DIR: strikepoint/strikepoint
 
 jobs:
   build-android:
@@ -42,11 +43,11 @@ jobs:
           done
 
       - name: Import project
-        run: godot --headless --path . --import || true
+        run: godot --headless --path "$PROJECT_DIR" --import || true
 
       - name: Validate (fails on any script error)
         run: |
-          godot --headless --path . --quit-after 120 2>&1 | tee validate.log
+          godot --headless --path "$PROJECT_DIR" --quit-after 120 2>&1 | tee validate.log
           if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" validate.log; then exit 1; fi
 
       - name: Export Android APK
@@ -55,9 +56,9 @@ jobs:
           GODOT_ANDROID_KEYSTORE_DEBUG_USER: androiddebugkey
           GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD: android
         run: |
-          mkdir -p build
-          godot --headless --path . --export-debug "Android" build/strikepoint-debug.apk
-          test -f build/strikepoint-debug.apk
+          mkdir -p "$GITHUB_WORKSPACE/build"
+          godot --headless --path "$PROJECT_DIR" --export-debug "Android" "$GITHUB_WORKSPACE/build/strikepoint-debug.apk"
+          test -f "$GITHUB_WORKSPACE/build/strikepoint-debug.apk"
 
       - uses: actions/upload-artifact@v4
         with:
